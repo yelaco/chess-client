@@ -1,0 +1,2 @@
+D:/WorkSpace/flutter/slches/flutter_slchess/android/app/.cxx/Debug/6o446s68/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/WorkSpace/flutter/slches/flutter_slchess/android/app/.cxx/Debug/6o446s68/arm64-v8a/CMakeFiles/rebuild_cache.dir

@@ -642,11 +642,11 @@ class AmplifyAuthService {
       await _userService.clearUserData();
 
       // Đăng xuất mà không chuyển hướng
-      await Amplify.Auth.signOut(
-        options: const SignOutOptions(
-          globalSignOut: false,
-        ),
-      );
+      // await Amplify.Auth.signOut(
+      //   options: const SignOutOptions(
+      //     globalSignOut: false,
+      //   ),
+      // );
 
       // Cập nhật trạng thái
       _authStateController.add(AuthState.unauthenticated);
@@ -756,6 +756,31 @@ class AmplifyAuthService {
     await _storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
     await _storage.write(key: ID_TOKEN_KEY, value: idToken);
     await _storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
+  }
+
+  Future<String?> getCurrentUserId() async {
+    try {
+      final idToken = await getIdToken();
+      if (idToken == null) return null;
+
+      // Phân tích token JWT
+      final parts = idToken.split('.');
+      if (parts.length != 3) {
+        safePrint('Token không đúng định dạng JWT');
+        return null;
+      }
+
+      // Giải mã phần payload (phần thứ 2)
+      String normalizedPayload = base64Url.normalize(parts[1]);
+      final payloadJson = utf8.decode(base64Url.decode(normalizedPayload));
+      final payload = jsonDecode(payloadJson);
+
+      // Lấy sub (subject) từ payload - đây là ID của người dùng
+      return payload['sub'] as String?;
+    } catch (e) {
+      safePrint('Lỗi khi lấy ID người dùng: $e');
+      return null;
+    }
   }
 
   // Dispose resources

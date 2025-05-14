@@ -3,17 +3,20 @@ import 'package:http/http.dart' as http;
 
 class UserRating {
   final String userId;
-  final int rating;
+  final String username;
+  final double rating;
 
   UserRating({
     required this.userId,
+    required this.username,
     required this.rating,
   });
 
   factory UserRating.fromJson(Map<String, dynamic> json) {
     return UserRating(
       userId: json['userId'] ?? '',
-      rating: json['rating'] ?? 0,
+      username: json['username'] ?? '',
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

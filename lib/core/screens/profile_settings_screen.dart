@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/amplify_auth_service.dart';
 import '../services/user_service.dart';
-import '../services/match_service.dart';
 import '../services/moveset_service.dart';
 import '../services/matchresult_service.dart';
 import '../models/user.dart';
@@ -9,8 +9,8 @@ import '../models/historymatch_model.dart';
 import '../models/matchresults_model.dart';
 import '../constants/app_styles.dart';
 import 'review_chessboard.dart';
-import 'package:http/http.dart' as http;
 import 'package:amplify_flutter/amplify_flutter.dart';
+import '../widgets/widgets.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -90,8 +90,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       if (_user != null) {
         final String? idToken = await _authService.getIdToken();
         if (idToken != null) {
-          final results =
-              await _matchResultService.getMatchResults(_user!.id, idToken);
+          final results = await _matchResultService.getMatchResults(idToken,
+              userId: _user!.id, isCache: true);
           if (!mounted) return;
           setState(() {
             _matchResults = results;
@@ -182,7 +182,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   Future<void> _changeAvatar() async {
-    await Navigator.pushNamed(context, '/uploadImage');
+    await Navigator.pushNamed(context, '/upload_image');
     await _loadUserData();
   }
 
@@ -235,13 +235,17 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thông tin cá nhân'),
+        title: const Text(
+          'Thông tin cá nhân',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF0E1416),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Đăng xuất',
+            color: Colors.white,
           ),
         ],
       ),
@@ -287,72 +291,79 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                 onTap: _changeAvatar,
                                 child: Stack(
                                   children: [
-                                    Container(
-                                      width: 120,
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white.withOpacity(0.1),
-                                        border: Border.all(
-                                            color: Colors.white, width: 2),
-                                      ),
-                                      child: _user!.picture.isNotEmpty
-                                          ? ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(60),
-                                              child: Image.network(
-                                                "${_user!.picture}/large",
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
-                                                  return const Center(
-                                                    child: Icon(
-                                                      Icons.person,
-                                                      size: 60,
-                                                      color: Colors.white,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            )
-                                          : const Center(
-                                              child: Icon(
-                                                Icons.person,
-                                                size: 60,
-                                                color: Colors.white,
-                                              ),
-                                            ),
+                                    Avatar(
+                                      _user!.picture,
+                                      size: 120,
                                     ),
                                     Positioned(
                                       bottom: 0,
                                       right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                              color: Colors.white, width: 2),
-                                        ),
-                                        child: const Icon(
-                                          Icons.camera_alt,
-                                          color: Colors.white,
-                                          size: 20,
+                                      child: GestureDetector(
+                                        onTap: _changeAvatar,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                                color: Colors.white, width: 2),
+                                          ),
+                                          child: const Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              if (_isSaving)
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 20),
-                                  child: CircularProgressIndicator(),
-                                ),
+                              // const SizedBox(height: 12),
+                              // if (_isSaving)
+                              //   const Padding(
+                              //     padding: EdgeInsets.only(top: 20),
+                              //     child: CircularProgressIndicator(),
+                              //   ),
                             ],
                           ),
                         ),
+                        Center(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_user != null) {
+                                final String userId = _user!.id;
+                                Clipboard.setData(ClipboardData(text: userId));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Đã sao chép ID: $userId'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.content_copy,
+                                  size: 10,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Sao chép ID người dùng',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
                         const SizedBox(height: 32),
 
                         // Thông tin cơ bản
@@ -368,11 +379,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                           controller: _locateController,
                           icon: Icons.location_on,
                         ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _saveUserData,
-                          child: const Text('Lưu thông tin'),
-                        ),
+                        // const SizedBox(height: 16),
+                        // ElevatedButton(
+                        //   onPressed: _saveUserData,
+                        //   child: const Text('Lưu thông tin'),
+                        // ),
 
                         const SizedBox(height: 32),
 
@@ -605,23 +616,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                 ),
               ],
             ),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundImage: _user != null && _user!.picture.isNotEmpty
-                  ? NetworkImage("${_user!.picture}/large")
-                  : null,
-              backgroundColor: AppStyles.defaultAvt,
-              child: _user == null || _user!.picture.isEmpty
-                  ? Text(
-                      _user?.username.substring(0, 1).toUpperCase() ??
-                          match.opponentId.substring(0, 2).toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : null,
-            ),
+            child: Avatar(
+                'https://slchess-dev-avatars.s3.ap-southeast-2.amazonaws.com/${match.opponentId}'),
           ),
           const SizedBox(width: 16),
           Expanded(

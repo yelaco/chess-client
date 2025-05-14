@@ -18,8 +18,10 @@ import 'core/models/user.dart';
 import 'core/models/matchresults_model.dart';
 import 'core/services/matchresult_service.dart';
 import 'core/screens/profile_settings_screen.dart';
+import 'core/screens/active_matches_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
+final routeObserver = RouteObserver<PageRoute>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -107,6 +109,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
+      navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       initialRoute: '/login',
       onGenerateRoute: (settings) {
@@ -162,6 +165,9 @@ class MyApp extends StatelessWidget {
           case '/account_settings':
             return MaterialPageRoute(
                 builder: (context) => const ProfileSettingsScreen());
+          case '/active_matches':
+            return MaterialPageRoute(
+                builder: (context) => const ActiveMatchesScreen());
           case '/puzzle_board':
             // Kiểm tra null trước khi ép kiểu
             final args = settings.arguments;

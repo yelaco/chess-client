@@ -1,0 +1,2 @@
+C:/Users/minhq/workspace/projects/slchess-client-flutter/android/app/.cxx/Debug/2e6z1mbv/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/minhq/workspace/projects/slchess-client-flutter/android/app/.cxx/Debug/2e6z1mbv/x86_64/CMakeFiles/rebuild_cache.dir

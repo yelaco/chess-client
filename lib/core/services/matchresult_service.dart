@@ -27,12 +27,16 @@ class MatchResultService {
     }
   }
 
-  Future<MatchResultsModel> getMatchResults(
-      String userId, String idToken) async {
+  Future<MatchResultsModel> getMatchResults(String idToken,
+      {bool isCache = false, String? userId}) async {
     try {
       // Lấy từ API
+      String url = userId != null
+          ? '${ApiConstants.matchResult}?userId=$userId'
+          : ApiConstants.matchResult;
+
       final response = await http.get(
-        Uri.parse(ApiConstants.matchResult),
+        Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $idToken',
         },
@@ -42,8 +46,10 @@ class MatchResultService {
         final Map<String, dynamic> data = json.decode(response.body);
         final results = MatchResultsModel.fromJson(data);
 
-        // Cache kết quả mới
-        await _cacheMatchResults(userId, results);
+        if (isCache) {
+          // Cache kết quả mới
+          await _cacheMatchResults(userId!, results);
+        }
 
         return results;
       } else {

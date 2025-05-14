@@ -5,12 +5,16 @@ class ApiConstants {
   static String baseUrl =
       "https://$identifier.execute-api.ap-southeast-2.amazonaws.com/dev";
   static String get matchMaking => "$baseUrl/matchmaking";
+  static String get activeMatch => "$baseUrl/active-matches";
 
   static String get getUserInfo => "$baseUrl/user";
   static String get getUploadImageUrl => "$baseUrl/avatar/upload";
   static String get getPulzzesUrl => "$baseUrl/puzzles";
   static String get getPulzzeUrl => "$baseUrl/puzzle";
   static String get matchResult => "$baseUrl/matchResults";
+
+  static String get getFriendUrl => "$baseUrl/friends";
+  static String get friendUrl => "$baseUrl/friend";
 
   static String getHistoryMatchUrl(String matchId) =>
       "$baseUrl/match/$matchId/states?limit=1000";
@@ -24,6 +28,7 @@ class WebsocketConstants {
   static String get wsUrl =>
       "wss://$wsIdentifier.execute-api.ap-southeast-2.amazonaws.com/dev";
   static String get game => "ws://$serverEndpoint/game/";
+  static String get graphqlUrl => "$wsUrl/graphql";
 }
 
 List<Map<String, String>> timeControls = [

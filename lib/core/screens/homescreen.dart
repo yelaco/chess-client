@@ -5,6 +5,7 @@ import 'puzzle_screen.dart';
 import 'leaderboard_screen.dart';
 import 'analysis_screen.dart';
 import 'profile_settings_screen.dart';
+import 'friends_screen.dart';
 // import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -40,6 +41,14 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false, // Ẩn nút quay lại
         actions: [
           IconButton(
+            icon: const Icon(Icons.sports_esports, color: Colors.white),
+            onPressed: () {
+              Navigator.pushNamed(context, '/active_matches');
+            },
+            tooltip: 'Xem trận đấu đang diễn ra',
+            iconSize: 28,
+          ),
+          IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () {
               Navigator.pushNamed(context, '/profile');
@@ -63,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
             PuzzleScreen(),
             AnalysisScreen(),
             LeaderboardScreen(),
-            ProfileSettingsScreen(),
+            FriendsScreen(),
             // SettingsPage(),
           ],
         ),
@@ -105,8 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
               label: "Xếp hạng",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: "Cài đặt",
+              icon: Icon(Icons.people),
+              label: "Bạn bè",
             ),
           ],
         ),

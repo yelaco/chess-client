@@ -1,6 +1,6 @@
 class MatchRecordModel {
   final String matchId;
-  final List<Player> players;
+  final List<PlayerRating> players;
   final String pgn;
   final List<String> moves;
   final DateTime startedAt;
@@ -34,7 +34,8 @@ class MatchRecordModel {
     return MatchRecordModel(
       matchId: json['matchId'] as String,
       players: (json['players'] as List)
-          .map((player) => Player.fromJson(player as Map<String, dynamic>))
+          .map(
+              (player) => PlayerRating.fromJson(player as Map<String, dynamic>))
           .toList(),
       pgn: json['pgn'] as String,
       moves: parsedMoves,
@@ -54,19 +55,19 @@ class MatchRecordModel {
   }
 }
 
-class Player {
+class PlayerRating {
   final String id;
   final int oldRating;
   final int newRating;
 
-  Player({
+  PlayerRating({
     required this.id,
     required this.oldRating,
     required this.newRating,
   });
 
-  factory Player.fromJson(Map<String, dynamic> json) {
-    return Player(
+  factory PlayerRating.fromJson(Map<String, dynamic> json) {
+    return PlayerRating(
       id: json['id'] as String,
       oldRating: json['oldRating'] as int,
       newRating: json['newRating'] as int,

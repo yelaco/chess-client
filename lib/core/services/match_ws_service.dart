@@ -25,8 +25,8 @@ class MatchWebsocketService {
       {void Function(GameState gameState)? onGameState,
       void Function(GameState gameState)? onEndgame,
       void Function()? onStatusChange,
+      void Function(int closeCode)? onDisconnect,
       required BuildContext context}) {
-    // Thêm BuildContext vào tham số
     channel.stream.listen(
       (message) {
         try {
@@ -61,8 +61,9 @@ class MatchWebsocketService {
       },
       onDone: () {
         print('Luồng đã bị đóng.');
-        // Hiển thị thông báo và điều hướng về home khi luồng bị đóng
-        _showConnectionClosedDialog(context);
+        print(
+            'Lý do đóng kết nối: ${channel.closeCode} - ${channel.closeReason}');
+        onDisconnect?.call(channel.closeCode ?? 1006);
       },
     );
   }

@@ -45,7 +45,7 @@ class MessageService {
           if (data['type'] == 'start_ack') {
             print('Kết nối WebSocket thành công');
             onStatusChange();
-          } else if (data['type'] == 'type') {
+          } else if (data['type'] == 'ka') {
             onStatusChange();
           } else if (data['type'] == 'data' && data['payload'] != null) {
             // Kiểm tra cấu trúc dữ liệu
@@ -68,7 +68,7 @@ class MessageService {
         print('Lỗi stream: $error');
       },
       onDone: () {
-        print('Kết nối đã đóng');
+        print('Kết nối chat đã đóng');
       },
     );
   }

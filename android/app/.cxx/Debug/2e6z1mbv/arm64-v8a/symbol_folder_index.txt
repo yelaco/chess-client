@@ -1,0 +1,1 @@
+C:\Users\minhq\workspace\projects\slchess-client-flutter\build\app\intermediates\cxx\Debug\2e6z1mbv\obj\arm64-v8a

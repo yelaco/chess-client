@@ -21,7 +21,7 @@ class GameState {
         if (clock is int) {
           parsedClocks.add(clock);
         } else if (clock is String) {
-          // Extract minutes and seconds from format like "9m53.619414155s"
+          // Extract minutes and seconds from format like "29m59.994616954s"
           int milliseconds = 0;
 
           // Parse minutes
@@ -52,6 +52,14 @@ class GameState {
       method: json['method'] as String?,
       lastMove: json['lastMove'] as String?,
     );
+  }
+
+  toJson() {
+    return {
+      "fen": fen,
+      "clocks": clocks,
+      "outcome": outcome,
+    };
   }
 }
 

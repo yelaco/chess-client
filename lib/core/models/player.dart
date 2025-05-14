@@ -28,12 +28,24 @@ class Player {
 
       return Player(
         user: user,
-        rating: json['rating'],
+        rating: (json['rating'] is int)
+            ? json['rating']
+            : (json['rating'] is double)
+                ? (json['rating'] as double).toInt()
+                : int.tryParse(json['rating'].toString()) ?? 0,
         rd: (json['rd'] != null)
             ? double.tryParse(json['rd'].toString()) ?? 0.0
             : 0.0,
-        newRatings: List<int>.from(json['newRatings'] ?? []),
-        newRDs: List<double>.from(json['newRDs'] ?? []),
+        newRatings: (json['newRatings'] != null)
+            ? (json['newRatings'] as List)
+                .map((e) => (e is int) ? e : (e as double).toInt())
+                .toList()
+            : [],
+        newRDs: (json['newRDs'] != null)
+            ? (json['newRDs'] as List)
+                .map((e) => (e is double) ? e : (e as int).toDouble())
+                .toList()
+            : [],
       );
     } catch (e) {
       throw Exception('Error creating Player: $e');

@@ -233,8 +233,16 @@ class _MatchMakingScreenState extends State<MatchMakingScreen> {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
+                      onPressed: () async {
+                        final String? storedIdToken =
+                            await _amplifyAuthService.getIdToken();
+                        if (storedIdToken != null) {
+                          final success = await matchMakingService
+                              .cancelQueue(storedIdToken);
+                          if (success) {
+                            Navigator.pop(context);
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/leaderboard_model.dart';
 import '../services/leaderboard_service.dart';
 import '../services/amplify_auth_service.dart';
 import '../models/user.dart';
@@ -7,6 +6,8 @@ import '../services/user_service.dart';
 import '../services/user_ratings_service.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import '../constants/app_styles.dart';
+import '../../../main.dart';
+import '../widgets/widgets.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -15,7 +16,7 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _LeaderboardScreenState extends State<LeaderboardScreen> with RouteAware {
   final AmplifyAuthService _authService = AmplifyAuthService();
   final UserService _userService = UserService();
   final UserRatingsService _userRatingsService = UserRatingsService();
@@ -24,6 +25,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   List<UserRating> _apiRatings = [];
   bool _isLoading = true;
   String? _error;
+  int? _currentUserRank;
 
   // Lưu trữ thông tin người dùng đã tải
   final Map<String, UserModel> _userCache = {};
@@ -32,6 +34,29 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   @override
   void initState() {
     super.initState();
+    _loadApiRatings();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPushNext() {
+    // Khi rời khỏi màn hình này
+  }
+
+  @override
+  void didPopNext() {
+    // Khi quay lại màn hình này từ màn hình khác
     _loadApiRatings();
   }
 
@@ -62,6 +87,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         _apiRatings = result.items;
         _isLoading = false;
       });
+
+      // Tìm vị trí xếp hạng của người dùng hiện tại
+      final currentUserId = await _authService.getCurrentUserId();
+      if (currentUserId != null) {
+        final userIndex =
+            _apiRatings.indexWhere((rating) => rating.userId == currentUserId);
+        if (userIndex != -1) {
+          setState(() {
+            _currentUserRank = userIndex + 1;
+          });
+        }
+      }
 
       // Tải thông tin người dùng cho mỗi ID
       _loadUserDetails();
@@ -102,7 +139,49 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           fit: BoxFit.cover,
         ),
       ),
-      child: _buildRatingsContent(),
+      child: Stack(
+        children: [
+          _buildRatingsContent(),
+          //   if (_currentUserRank != null)
+          //     Positioned(
+          //       bottom: 16,
+          //       right: 16,
+          //       child: Container(
+          //         padding:
+          //             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //         decoration: BoxDecoration(
+          //           color: AppStyles.primaryColor.withOpacity(0.9),
+          //           borderRadius: AppStyles.defaultBorderRadius,
+          //           boxShadow: [
+          //             BoxShadow(
+          //               color: Colors.black.withOpacity(0.2),
+          //               blurRadius: 4,
+          //               offset: const Offset(0, 2),
+          //             ),
+          //           ],
+          //         ),
+          //         child: Row(
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             const Icon(
+          //               Icons.emoji_events,
+          //               color: Colors.white,
+          //               size: 20,
+          //             ),
+          //             const SizedBox(width: 8),
+          //             Text(
+          //               'Xếp hạng của bạn: $_currentUserRank',
+          //               style: AppStyles.bodyMedium.copyWith(
+          //                 color: Colors.white,
+          //                 fontWeight: FontWeight.bold,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+        ],
+      ),
     );
   }
 
@@ -209,8 +288,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   Widget _buildApiRatingRow(UserRating rating, int index) {
-    final user = _userCache[rating.userId];
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -228,31 +305,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               child: _buildRankWidget(index + 1),
             ),
             const SizedBox(width: AppStyles.defaultSpacing),
+            // Avatar(
+            //     'https://slchess-dev-avatars.s3.ap-southeast-2.amazonaws.com/${rating.userId}'),
+            // const SizedBox(width: AppStyles.smallSpacing),
             Expanded(
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundImage: user != null && user.picture.isNotEmpty
-                        ? NetworkImage("${user.picture}/large")
-                        : null,
-                    backgroundColor: AppStyles.defaultAvt,
-                    child: user == null || user.picture.isEmpty
-                        ? Text(
-                            user?.username.substring(0, 1).toUpperCase() ??
-                                rating.userId.substring(0, 2).toUpperCase(),
-                            style: AppStyles.bodySmall.copyWith(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: AppStyles.smallSpacing),
                   Expanded(
                     child: Text(
-                      user?.username ??
-                          'ID: ${rating.userId.substring(0, 10)}...',
+                      rating.username,
                       style: AppStyles.bodyMedium.copyWith(
                         color: Colors.white,
                       ),
@@ -269,7 +330,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 borderRadius: AppStyles.defaultBorderRadius,
               ),
               child: Text(
-                '${rating.rating}',
+                '${rating.rating.toInt()}',
                 style: AppStyles.bodyMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
